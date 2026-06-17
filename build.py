@@ -4,8 +4,9 @@
 content/ 패키지의 페이지 정의를 읽어 정적 HTML을 생성한다.
 
 규칙(자동 적용):
-  - 본문 텍스트 2,000자 미만 페이지는 robots noindex 처리
-  - sitemap.xml 에는 index 허용 페이지만 포함
+  - 모든 페이지를 index,follow 로 출력 (명시적 noindex 플래그가 있는 경우만 제외)
+  - 본문 2,000자 미만 페이지는 빌드 리포트에 ⚠ 경고만 표시 (색인은 유지)
+  - sitemap.xml 에는 noindex 가 아닌 모든 페이지 포함
   - 지역+역+테마 조합 경로는 생성 자체가 불가능한 구조
 """
 import datetime
