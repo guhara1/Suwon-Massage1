@@ -60,6 +60,38 @@ python3 tools/audit.py  # 배포 전 감사
 - 지역 허브(/suwon/), 행정구 허브 4곳, 역세권 허브(/suwon/stations/)
 - 역세권 상세 14개 페이지
 
+## 색인 가속 (네이버·구글·빙)
+
+빌드 시 자동 생성: `sitemap.xml`(lastmod 포함), `rss.xml`(매거진 피드),
+`robots.txt`(주요 봇 명시 + sitemap), IndexNow 키 파일 `e93b2eb05cecdff4896a9ef76434b898.txt`.
+
+### IndexNow — 빙·네이버·얀덱스 즉시 통보 (추천)
+
+키 파일이 배포돼 있으면(빌드가 루트에 생성) 아래 한 줄로 전체 또는 개별 URL을 통보합니다.
+
+```bash
+python tools/indexnow.py                  # sitemap의 모든 URL 일괄 통보
+python tools/indexnow.py https://suwon-massage1.pages.dev/magazine/new-post/   # 새 글 1건
+```
+
+> 글을 올리거나 페이지를 고칠 때마다 해당 URL만 통보하면 즉시 색인 요청이 전달됩니다.
+> 빙과 네이버(Yeti)가 IndexNow에 참여합니다. **키 파일이 먼저 배포된 뒤** 실행하세요.
+
+### 구글 Indexing API — 구글 즉시 통보 (구글은 IndexNow 미참여)
+
+```bash
+# 사전: Indexing API 사용설정 + 서비스계정 JSON + Search Console 소유자 등록 + pip install google-auth requests
+GOOGLE_APPLICATION_CREDENTIALS=/path/sa.json python tools/google_index.py
+```
+
+> 구글 Indexing API는 공식적으로 JobPosting·BroadcastEvent용입니다. 일반 페이지는
+> Search Console 사이트맵 제출 + URL 검사가 가장 확실합니다.
+
+### sitemap ping은?
+
+구글(2023.6)·빙의 `ping?sitemap=` 엔드포인트는 **폐지**되었습니다. 현재 권장 경로는
+①IndexNow(빙·네이버) + ②Search Console/서치어드바이저 사이트맵 제출 + ③구글 Indexing API 입니다.
+
 ## 배포 전 해야 할 일
 
 1. `content/site.py`의 `BASE_URL`을 실제 도메인으로 변경

@@ -15,6 +15,9 @@ FOOTER_DESC = ("수원시 전지역 방문 출장마사지·홈타이 안내 사
                "모든 서비스는 안내된 관리 범위와 위생·안전 기준 안에서만 제공됩니다.")
 FOOTER_REGION = "경기도 수원시 전지역"
 
+# IndexNow (Bing·Naver·Yandex 즉시 색인 통보) 키
+INDEXNOW_KEY = "e93b2eb05cecdff4896a9ef76434b898"
+
 # 주요 허브 경로
 MASSAGE_HUB = "/massage/"
 AREA_HUB = "/suwon/"

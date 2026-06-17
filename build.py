@@ -8,6 +8,7 @@ content/ 패키지의 페이지 정의를 읽어 정적 HTML을 생성한다.
   - sitemap.xml 에는 index 허용 페이지만 포함
   - 지역+역+테마 조합 경로는 생성 자체가 불가능한 구조
 """
+import datetime
 import html
 import os
 import re
@@ -20,7 +21,7 @@ from content import PAGES
 from content.site import (
     BASE_URL, BRAND, BRAND_MARK, NAV, PHONE, PHONE_DISPLAY,
     REGION, TAGLINE, FOOTER_DESC, FOOTER_REGION,
-    MASSAGE_HUB, AREA_HUB, STATIONS_HUB,
+    MASSAGE_HUB, AREA_HUB, STATIONS_HUB, INDEXNOW_KEY,
 )
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -167,6 +168,7 @@ def render_page(page: dict) -> str:
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css">
+<link rel="alternate" type="application/rss+xml" title="{BRAND} 매거진" href="{BASE_URL.rstrip('/')}/rss.xml">
 {extra_head}</head>
 <body>
 <header class="site-header">
@@ -257,12 +259,20 @@ def render_page(page: dict) -> str:
 """
 
 
+def _page_date(page: dict) -> str:
+    """페이지 본문의 <time datetime="..."> 또는 오늘 날짜(YYYY-MM-DD)."""
+    m = re.search(r'<time datetime="(\d{4}-\d{2}-\d{2})"', page.get("body", ""))
+    return m.group(1) if m else datetime.date.today().isoformat()
+
+
 def build() -> None:
+    base = BASE_URL.rstrip("/")
     report = []
-    sitemap_urls = []
+    sitemap_rows = []          # (loc, lastmod)
+    indexable_urls = []        # IndexNow 통보용
 
     for page in PAGES:
-        path = page["path"]  # "" 또는 "nowon-gu/wolgye-dong/" 형태
+        path = page["path"]  # "" 또는 "suwon/jangan-gu/jeongja-dong/" 형태
         out_dir = os.path.join(ROOT, path)
         os.makedirs(out_dir, exist_ok=True)
         html_out = render_page(page)
@@ -272,12 +282,15 @@ def build() -> None:
         chars = text_length(page["body"])
         noindex = page.get("noindex", False) or chars < MIN_INDEX_CHARS
         if not noindex:
-            sitemap_urls.append(BASE_URL.rstrip("/") + "/" + path)
+            loc = base + "/" + path
+            sitemap_rows.append((loc, _page_date(page)))
+            indexable_urls.append(loc)
         report.append((path or "/", chars, "noindex" if noindex else "index"))
 
-    # sitemap.xml
+    # sitemap.xml (lastmod 포함)
     urls = "\n".join(
-        f"  <url><loc>{u}</loc></url>" for u in sitemap_urls
+        f"  <url><loc>{loc}</loc><lastmod>{lm}</lastmod></url>"
+        for loc, lm in sitemap_rows
     )
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write(
@@ -286,14 +299,71 @@ def build() -> None:
             f"{urls}\n</urlset>\n"
         )
 
-    # robots.txt
+    # rss.xml — 매거진(글) 피드. 네이버/구글/리더 구독 + 신규 글 발견 가속.
+    try:
+        from content import magazine
+        posts = []
+        for p in magazine.PAGES:
+            if p["path"] == "magazine/":   # 허브 제외
+                continue
+            dm = re.search(r'<time datetime="(\d{4}-\d{2}-\d{2})"', p["body"])
+            posts.append((p, dm.group(1) if dm else datetime.date.today().isoformat()))
+        posts.sort(key=lambda x: x[1], reverse=True)
+        items = []
+        for p, d in posts:
+            link = base + "/" + p["path"]
+            pub = datetime.datetime.strptime(d, "%Y-%m-%d").strftime(
+                "%a, %d %b %Y 09:00:00 +0900")
+            title = html.escape(p["title"])
+            desc = html.escape(p["desc"])
+            items.append(
+                f"    <item>\n"
+                f"      <title>{title}</title>\n"
+                f"      <link>{link}</link>\n"
+                f"      <guid isPermaLink=\"true\">{link}</guid>\n"
+                f"      <pubDate>{pub}</pubDate>\n"
+                f"      <description>{desc}</description>\n"
+                f"    </item>"
+            )
+        now = datetime.datetime.now().strftime("%a, %d %b %Y %H:%M:%S +0900")
+        rss = (
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n'
+            '  <channel>\n'
+            f'    <title>{html.escape(BRAND)} 매거진</title>\n'
+            f'    <link>{base}/magazine/</link>\n'
+            f'    <atom:link href="{base}/rss.xml" rel="self" type="application/rss+xml"/>\n'
+            '    <description>수원 출장마사지·홈타이 — 마사지·휴식·컨디션 관리 가이드</description>\n'
+            '    <language>ko</language>\n'
+            f'    <lastBuildDate>{now}</lastBuildDate>\n'
+            + "\n".join(items) + "\n"
+            '  </channel>\n</rss>\n'
+        )
+        with open(os.path.join(ROOT, "rss.xml"), "w", encoding="utf-8") as f:
+            f.write(rss)
+    except Exception as e:  # 피드 실패가 빌드를 막지 않도록
+        print(f"[rss] skipped: {e}")
+
+    # robots.txt — 모든 봇 허용 + 주요 봇 명시 + 사이트맵
     with open(os.path.join(ROOT, "robots.txt"), "w", encoding="utf-8") as f:
         f.write(
             "User-agent: *\nAllow: /\n\n"
-            f"Sitemap: {BASE_URL.rstrip('/')}/sitemap.xml\n"
+            "# 네이버\nUser-agent: Yeti\nAllow: /\n\n"
+            "# 구글\nUser-agent: Googlebot\nAllow: /\n\n"
+            "# 빙(IndexNow)\nUser-agent: bingbot\nAllow: /\n\n"
+            "# 다음\nUser-agent: Daum\nAllow: /\n\n"
+            f"Sitemap: {base}/sitemap.xml\n"
         )
 
-    # .nojekyll (GitHub Pages)
+    # IndexNow 키 파일 (사이트 루트에 {key}.txt = 키 본문)
+    with open(os.path.join(ROOT, f"{INDEXNOW_KEY}.txt"), "w", encoding="utf-8") as f:
+        f.write(INDEXNOW_KEY + "\n")
+
+    # 통보용 URL 목록 저장 (tools/indexnow.py 가 읽음)
+    with open(os.path.join(ROOT, "tools", "urls.txt"), "w", encoding="utf-8") as f:
+        f.write("\n".join(indexable_urls) + "\n")
+
+    # .nojekyll (정적 호스팅에서 _ 디렉터리 보존)
     open(os.path.join(ROOT, ".nojekyll"), "w").close()
 
     width = max(len(p) for p, _, _ in report)
@@ -301,7 +371,8 @@ def build() -> None:
     for p, c, r in sorted(report):
         flag = "" if (r == "noindex" or MIN_INDEX_CHARS <= c <= 2500) else "  ⚠"
         print(f"{p.ljust(width)}  {str(c).rjust(5)}  {r}{flag}")
-    print(f"\n{len(report)} pages built, {len(sitemap_urls)} in sitemap.")
+    print(f"\n{len(report)} pages built, {len(sitemap_rows)} in sitemap, "
+          f"{len(indexable_urls)} URLs for IndexNow.")
 
 
 if __name__ == "__main__":
