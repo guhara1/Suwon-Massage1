@@ -2,6 +2,8 @@
 from .site import BASE_URL, BRAND, PHONE, PHONE_DISPLAY
 from .pricing import PRICING
 
+_NAVER = '<meta name="naver-site-verification" content="86a1f5004c2ab7eb60dba3f1f179be684bb12bdd" />\n'
+
 _JSONLD = f"""<script type="application/ld+json">
 {{
   "@context": "https://schema.org",
@@ -216,7 +218,7 @@ PAGE = {
     "desc": "수원 출장마사지·홈타이 안내 페이지입니다. 장안구, 권선구, 팔달구, 영통구와 수원역·광교중앙역 등 주요 역세권, 테마별 관리, 예약 전 확인사항을 확인해보세요.",
     "h1": "수원 출장마사지·홈타이 예약 안내",
     "body": _BODY,
-    "extra_head": _JSONLD,
+    "extra_head": _NAVER + _JSONLD,
     "breadcrumb": [],
     "hero": _HERO,
 }
