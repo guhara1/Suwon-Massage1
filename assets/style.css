@@ -540,12 +540,24 @@ th { background: var(--panel-2); color: var(--gold-soft); font-family: var(--ser
 }
 .footer-copy { font-size: 0.78rem; opacity: 0.75; margin: 0; }
 .footer-note { font-size: 0.76rem; opacity: 0.55; margin: 0; }
-.footer-made {
-  font-size: 0.76rem; color: var(--text-dim);
-  border: 1px solid var(--line); border-radius: 16px;
-  padding: 4px 14px; white-space: nowrap; transition: 0.15s;
+.footer-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.footer-btn {
+  font-size: 0.76rem; font-weight: 700; white-space: nowrap;
+  border-radius: 16px; padding: 5px 15px; transition: 0.15s;
+  border: 1px solid transparent;
 }
-.footer-made:hover { color: var(--gold-soft); border-color: var(--line-gold); }
+/* 오렌지 — 제휴문의 / 웹사이트 제작문의 */
+.footer-partner, .footer-made {
+  color: #fff7ef;
+  background: linear-gradient(135deg, #ff8a3d, #f4631e);
+  border-color: rgba(255, 138, 61, 0.55);
+  box-shadow: 0 2px 10px rgba(244, 99, 30, 0.28);
+}
+.footer-partner:hover, .footer-made:hover {
+  color: #fff;
+  background: linear-gradient(135deg, #ff974f, #ff6f2c);
+  border-color: rgba(255, 160, 90, 0.85);
+}
 
 @media (max-width: 920px) {
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px; padding-top: 36px; }
