@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.suwon-massage.example.com/sitemap.xml
+Sitemap: https://suwon-massage1.pages.dev/sitemap.xml
