@@ -120,7 +120,7 @@ def render_page(page: dict) -> str:
     hero = page.get("hero", "")
 
     chars = text_length(body)
-    noindex = page.get("noindex", False) or chars < MIN_INDEX_CHARS
+    noindex = page.get("noindex", False)
     robots = (
         '<meta name="robots" content="noindex,follow">'
         if noindex
@@ -280,7 +280,7 @@ def build() -> None:
             f.write(html_out)
 
         chars = text_length(page["body"])
-        noindex = page.get("noindex", False) or chars < MIN_INDEX_CHARS
+        noindex = page.get("noindex", False)
         if not noindex:
             loc = base + "/" + path
             sitemap_rows.append((loc, _page_date(page)))

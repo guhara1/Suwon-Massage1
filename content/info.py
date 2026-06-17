@@ -407,7 +407,6 @@ PRIVACY = {
     "title": f"개인정보처리방침 | {BRAND}",
     "desc": f"{BRAND} 개인정보처리방침입니다. 수집 항목, 이용 목적, 보유 기간, 파기 절차를 안내합니다.",
     "h1": "개인정보처리방침",
-    "noindex": True,
     "breadcrumb": [("고객센터", "/support/"), ("개인정보처리방침", None)],
     "body": f"""
 <section>
@@ -438,7 +437,6 @@ TERMS = {
     "title": f"이용약관 | {BRAND}",
     "desc": f"{BRAND} 이용약관입니다. 서비스 범위, 예약과 취소, 이용자와 운영자의 의무를 안내합니다.",
     "h1": "이용약관",
-    "noindex": True,
     "breadcrumb": [("고객센터", "/support/"), ("이용약관", None)],
     "body": f"""
 <section>
