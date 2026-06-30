@@ -1,6 +1,7 @@
 # 안내성 페이지 — 출장마사지 허브, 코스, 예약, 가이드, 후기, 고객센터, 약관.
 # 하위 메뉴 항목은 별도 페이지 대신 앵커 섹션으로 운영해 얇은 페이지를 만들지 않는다.
 from .site import BRAND, PHONE, PHONE_DISPLAY
+from .schema import review_cards_html
 
 _CTA = f"""
 <section class="cta">
@@ -290,6 +291,12 @@ REVIEWS = {
     "breadcrumb": [("후기", None)],
     "body": """
 <p class="lead">실제 이용자의 후기를 모아 보여드리는 공간입니다. 후기는 이용 확인이 된 예약 건에 한해 등록됩니다.</p>
+
+<section id="recent">
+<h2>최근 이용 후기</h2>
+<p>이용이 확인된 예약 건의 최신 후기입니다. 지역·테마·이용 시간대를 함께 표기하니, 본인과 비슷한 상황의 후기를 찾아 참고해 보세요.</p>
+""" + review_cards_html() + """
+</section>
 
 <section id="all">
 <h2>후기 운영 원칙</h2>

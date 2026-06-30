@@ -71,7 +71,7 @@ python3 tools/audit.py  # 배포 전 감사
 
 ```bash
 python tools/indexnow.py                  # sitemap의 모든 URL 일괄 통보
-python tools/indexnow.py https://suwon-massage1.pages.dev/magazine/new-post/   # 새 글 1건
+python tools/indexnow.py https://suwon-massage1.netlify.app/magazine/new-post/   # 새 글 1건
 ```
 
 > 글을 올리거나 페이지를 고칠 때마다 해당 URL만 통보하면 즉시 색인 요청이 전달됩니다.

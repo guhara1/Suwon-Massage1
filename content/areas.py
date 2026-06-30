@@ -1,11 +1,25 @@
 # 지역별 안내 — 수원시 허브 1 + 행정구 허브 4 + 대표 행정동 29.
 # 숫자 행정동(정자1~3동, 세류1~3동, 매탄1~4동, 영통1~3동 등) 개별 페이지는 만들지 않는다.
 from .pricing import PRICING
-from ._helpers import CTA
+from ._helpers import CTA, related_links
 from .dongs_jangan import PAGES as _JANGAN
 from .dongs_gwonseon import PAGES as _GWONSEON
 from .dongs_paldal import PAGES as _PALDAL
 from .dongs_yeongtong import PAGES as _YEONGTONG
+
+# 지역 허브·행정구 공통 롱테일 내부링크
+_GU_RELATED = related_links(
+    [
+        ("수원 출장마사지 전체 코스·요금", "/courses/"),
+        ("스웨디시·아로마 등 테마별 안내", "/themes/"),
+        ("지하철역별 방문 마사지 안내", "/suwon/stations/"),
+        ("처음 이용 가이드와 준비사항", "/guide/#first"),
+        ("심야 24시간·수면 가능 안내", "/themes/24hours/"),
+        ("실제 이용자 후기와 평점", "/reviews/"),
+    ],
+    title="이 지역과 함께 보면 좋은 안내",
+    lead="구 안의 대표 동과 가까운 역세권, 관리 테마를 함께 확인하면 예약이 빨라집니다.",
+)
 
 # ---------------------------------------------------------------------------
 # 수원시 전체 허브
@@ -60,7 +74,7 @@ _HUB_BODY = """
 <h2>예약 시 알아두면 좋은 점</h2>
 <p>수원시 전역에서 예약 흐름은 동일하지만, 네 개 구의 생활 환경이 달라 미리 알아두면 도움이 되는 점이 몇 가지 있습니다. 북수원 장안구는 대단지 아파트와 성균관대 대학가, 외곽 주택가가 섞여 있어 공동현관 출입 방법을 알려주시면 좋고, 서수원 권선구는 호매실 신축 단지와 고색·오목천 외곽이 함께 있어 외곽 위치는 예상 도착 시간을 함께 확인합니다. 팔달구는 수원역과 인계동을 낀 도심이라 오피스텔·숙박시설 출입 안내가 중요하고, 영통구는 광교·영통·망포 계획도시라 단지명과 동·호수만 정확하면 도착이 빠릅니다. 처음 이용하시는 분은 <a href="/guide/">이용가이드</a>에서 준비사항을 먼저 확인하시면 통화가 한결 짧아집니다.</p>
 </section>
-""" + PRICING + CTA
+""" + _GU_RELATED + PRICING + CTA
 
 HUB = {
     "path": "suwon/",
@@ -81,7 +95,7 @@ def _gu_hub(gu_slug, gu_name, title, desc, sections):
         "title": title,
         "desc": desc,
         "h1": f"{gu_name} 방문 관리 안내",
-        "body": sections + PRICING + CTA,
+        "body": sections + _GU_RELATED + PRICING + CTA,
         "breadcrumb": [("지역별 안내", "/suwon/"), (gu_name, None)],
     }
 
