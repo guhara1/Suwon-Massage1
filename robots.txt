@@ -17,4 +17,4 @@ Allow: /
 User-agent: Daum
 Allow: /
 
-Sitemap: https://suwon-massage1.pages.dev/sitemap.xml
+Sitemap: https://suwon-massage1.netlify.app/sitemap.xml

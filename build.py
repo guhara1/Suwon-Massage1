@@ -19,6 +19,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from content import PAGES
+from content import schema
 from content.site import (
     BASE_URL, BRAND, BRAND_MARK, NAV, PHONE, PHONE_DISPLAY,
     REGION, TAGLINE, FOOTER_DESC, FOOTER_REGION,
@@ -117,7 +118,8 @@ def render_page(page: dict) -> str:
     h1 = page["h1"]
     body = page["body"]
     crumbs = page.get("breadcrumb") or []
-    extra_head = page.get("extra_head", "")
+    # 전 페이지 공통 구조화 데이터(사업장·평점·후기·breadcrumb·FAQ) 자동 주입.
+    extra_head = page.get("extra_head", "") + schema.page_schema(page)
     hero = page.get("hero", "")
 
     chars = text_length(body)
@@ -261,9 +263,30 @@ def render_page(page: dict) -> str:
 
 
 def _page_date(page: dict) -> str:
-    """페이지 본문의 <time datetime="..."> 또는 오늘 날짜(YYYY-MM-DD)."""
-    m = re.search(r'<time datetime="(\d{4}-\d{2}-\d{2})"', page.get("body", ""))
+    """매거진 글의 게시일(post-meta 내 <time>) 또는 오늘 날짜(YYYY-MM-DD).
+    후기 카드 등 본문 다른 곳의 <time> 은 lastmod 로 쓰지 않는다."""
+    m = re.search(
+        r'class="post-meta".*?<time datetime="(\d{4}-\d{2}-\d{2})"',
+        page.get("body", ""), flags=re.S)
     return m.group(1) if m else datetime.date.today().isoformat()
+
+
+def _sitemap_weight(path: str):
+    """경로별 (changefreq, priority) — 색인 우선순위 신호."""
+    if path == "":                                   # 메인
+        return ("daily", "1.0")
+    if path in ("massage/", "suwon/", "suwon/stations/", "themes/",
+                "courses/", "reservation/", "guide/", "reviews/",
+                "support/", "magazine/"):            # 주요 허브
+        return ("weekly", "0.9")
+    if path.startswith("support/"):                  # 약관·정책
+        return ("yearly", "0.4")
+    if path.startswith("magazine/"):                 # 매거진 글
+        return ("monthly", "0.7")
+    depth = path.strip("/").count("/")
+    if depth == 1:                                   # 행정구 허브
+        return ("weekly", "0.8")
+    return ("weekly", "0.7")                         # 동·역 상세
 
 
 def build() -> None:
@@ -284,14 +307,15 @@ def build() -> None:
         noindex = page.get("noindex", False)
         if not noindex:
             loc = base + "/" + path
-            sitemap_rows.append((loc, _page_date(page)))
+            sitemap_rows.append((loc, _page_date(page), _sitemap_weight(path)))
             indexable_urls.append(loc)
         report.append((path or "/", chars, "noindex" if noindex else "index"))
 
-    # sitemap.xml (lastmod 포함)
+    # sitemap.xml (lastmod·changefreq·priority 포함 — 색인 우선순위 신호)
     urls = "\n".join(
-        f"  <url><loc>{loc}</loc><lastmod>{lm}</lastmod></url>"
-        for loc, lm in sitemap_rows
+        f"  <url><loc>{loc}</loc><lastmod>{lm}</lastmod>"
+        f"<changefreq>{cf}</changefreq><priority>{pr}</priority></url>"
+        for loc, lm, (cf, pr) in sitemap_rows
     )
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write(

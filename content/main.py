@@ -1,75 +1,12 @@
 # 메인 페이지 — 허브 역할. 모든 키워드를 밀어 넣지 않고 상세 페이지로 연결한다.
-from .site import BASE_URL, BRAND, PHONE, PHONE_DISPLAY
+from .site import BASE_URL, BRAND, PHONE, PHONE_DISPLAY, NAVER_VERIFY
 from .pricing import PRICING
+from .schema import review_cards_html
+from ._helpers import related_links
 
-_NAVER = '<meta name="naver-site-verification" content="86a1f5004c2ab7eb60dba3f1f179be684bb12bdd" />\n'
+_NAVER = f'<meta name="naver-site-verification" content="{NAVER_VERIFY}" />\n'
 
-_JSONLD = f"""<script type="application/ld+json">
-{{
-  "@context": "https://schema.org",
-  "@type": "HealthAndBeautyBusiness",
-  "name": "{BRAND}",
-  "telephone": "{PHONE}",
-  "url": "{BASE_URL}/",
-  "image": "{BASE_URL}/assets/og-image.png",
-  "description": "경기도 수원시 전지역 방문 출장마사지·홈타이 예약 안내",
-  "areaServed": {{
-    "@type": "AdministrativeArea",
-    "name": "경기도 수원시"
-  }},
-  "openingHours": "Mo-Su 00:00-24:00",
-  "priceRange": "₩90,000 - ₩180,000"
-}}
-</script>
-<script type="application/ld+json">
-{{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {{
-      "@type": "Question",
-      "name": "수원시 전지역 방문이 가능한가요?",
-      "acceptedAnswer": {{
-        "@type": "Answer",
-        "text": "예약 시간, 정확한 위치, 배정 상황에 따라 가능 여부가 달라집니다. 지역별 안내에서 장안구, 권선구, 팔달구, 영통구와 대표 행정동 기준으로 확인할 수 있습니다."
-      }}
-    }},
-    {{
-      "@type": "Question",
-      "name": "수원역이나 광교중앙역 근처도 가능한가요?",
-      "acceptedAnswer": {{
-        "@type": "Answer",
-        "text": "주요 역세권은 역 상세 페이지에서 주변 생활권과 함께 안내합니다. 정확한 가능 여부는 예약 시 위치를 기준으로 확인합니다."
-      }}
-    }},
-    {{
-      "@type": "Question",
-      "name": "매탄1동, 영통2동은 왜 따로 없나요?",
-      "acceptedAnswer": {{
-        "@type": "Answer",
-        "text": "매탄1~4동은 매탄동, 영통1~3동은 영통동처럼 숫자 행정동은 대표 동 페이지에서 통합 안내하여 중복 페이지 위험을 줄입니다."
-      }}
-    }},
-    {{
-      "@type": "Question",
-      "name": "당일 예약도 가능한가요?",
-      "acceptedAnswer": {{
-        "@type": "Answer",
-        "text": "가능할 수 있지만 저녁 시간대와 주말은 문의가 많을 수 있어 사전 예약을 권장합니다."
-      }}
-    }},
-    {{
-      "@type": "Question",
-      "name": "테마별 관리는 어디에서 확인하나요?",
-      "acceptedAnswer": {{
-        "@type": "Answer",
-        "text": "스웨디시, 타이마사지, 홈케어 등 테마별 안내 페이지에서 특징과 추천 대상을 확인할 수 있습니다."
-      }}
-    }}
-  ]
-}}
-</script>
-"""
+# 사업장·평점·후기·FAQ·breadcrumb JSON-LD 는 build.py 가 전 페이지 공통으로 주입한다.
 
 _HERO = f"""<section class="hero">
   <div class="hero-inner">
@@ -204,6 +141,28 @@ _BODY = f"""
 </div>
 </section>
 
+<section id="reviews">
+<h2>이용자 후기와 평점</h2>
+<p>실제 이용이 확인된 예약 건의 후기만 모았습니다. 좋은 평가와 아쉬운 평가를 다듬지 않고 그대로 보여드리며, 각 후기에는 이용 지역과 받은 테마, 이용 시간대를 함께 표기합니다. 더 많은 후기는 <a href="/reviews/">이용 후기 페이지</a>에서 확인하실 수 있습니다.</p>
+{review_cards_html(limit=4)}
+</section>
+
+{related_links([
+    ("수원 출장마사지 처음 이용 가이드", "/magazine/first-time-guide/"),
+    ("스웨디시와 타이마사지 차이 비교", "/magazine/swedish-vs-thai/"),
+    ("운동 후 회복 마사지 받는 타이밍", "/magazine/post-workout-timing/"),
+    ("수면 개선을 돕는 야간 마사지", "/magazine/sleep-and-massage/"),
+    ("어깨·목 결림 집중 관리법", "/magazine/neck-shoulder-care/"),
+    ("부모님 선물 출장마사지 가이드", "/magazine/parents-gift/"),
+    ("심야 24시간 방문 마사지 안내", "/themes/24hours/"),
+    ("수면 가능 새벽 홈타이 안내", "/themes/overnight/"),
+    ("커플 동시 진행 마사지 코스", "/themes/couple/"),
+    ("수원역 인근 숙소 출장마사지", "/suwon/stations/suwon-station/"),
+    ("광교중앙역 방문 마사지 안내", "/suwon/stations/gwanggyo-jungang-station/"),
+    ("삼성전자 인근 매탄동 출장마사지", "/suwon/yeongtong-gu/maetan-dong/"),
+], title="수원 출장마사지, 이런 주제로 찾고 계신가요?",
+   lead="자주 찾는 롱테일 주제를 바로 연결했습니다. 상황에 맞는 안내부터 확인해 보세요.")}
+
 {PRICING}
 <section id="contact" class="cta">
 <h2>예약문의</h2>
@@ -218,7 +177,7 @@ PAGE = {
     "desc": "수원 출장마사지·홈타이 예약 안내. 장안·권선·팔달·영통 4개 구와 수원역·광교중앙역 등 역세권, 테마별 관리를 정리했습니다.",
     "h1": "수원 출장마사지·홈타이 예약 안내",
     "body": _BODY,
-    "extra_head": _NAVER + _JSONLD,
+    "extra_head": _NAVER,
     "breadcrumb": [],
     "hero": _HERO,
 }
